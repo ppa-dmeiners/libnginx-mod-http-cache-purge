@@ -1,0 +1,21 @@
+Source: libnginx-mod-http-cache-purge
+Section: httpd
+Maintainer: Debian Nginx Maintainers <pkg-nginx-maintainers@alioth-lists.debian.net>
+Uploaders: Jan Mojžíš <janmojzis@debian.org>,
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-nginx,
+Standards-Version: 4.7.3
+Homepage: https://github.com/FRiCKLE/ngx_cache_purge
+Vcs-Git: https://salsa.debian.org/nginx-team/libnginx-mod-http-cache-purge.git
+Vcs-Browser: https://salsa.debian.org/nginx-team/libnginx-mod-http-cache-purge
+
+Package: libnginx-mod-http-cache-purge
+Architecture: any
+Multi-Arch: foreign
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Recommends: nginx,
+Description: Purge content from Nginx caches
+ Cache Purge module adds purging capabilities to Nginx. It allows purging
+ content from caches used by all of Nginx proxy modules, like FastCGI, Proxy,
+ SCGI and uWSGI.

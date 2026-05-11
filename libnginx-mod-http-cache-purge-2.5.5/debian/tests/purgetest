@@ -1,0 +1,34 @@
+#!/bin/sh
+set -e
+
+cat <<EOF > "/etc/nginx/sites-enabled/default"
+proxy_cache_path  /tmp/ngx_cache_purge_cache keys_zone=test_cache:10m;
+proxy_temp_path   /tmp/ngx_cache_purge_temp 1 2;
+
+server {
+    listen 127.0.0.1:80 default_server;
+
+    location /proxy {
+        proxy_pass         \$scheme://127.0.0.1:\$server_port/etc/passwd;
+        proxy_cache        test_cache;
+        proxy_cache_key    \$uri\$is_args\$args;
+        proxy_cache_valid  3m;
+        add_header         X-Cache-Status \$upstream_cache_status;
+    }
+
+    location ~ /purge(/.*) {
+        proxy_cache_purge  test_cache \$1\$is_args\$args;
+    }
+
+    location = /etc/passwd {
+        root               /;
+    }
+}
+EOF
+
+nginx -t
+invoke-rc.d nginx restart || { journalctl -n all -xu nginx.service; exit 1; }
+
+curl --fail -s -o /dev/null -w "GET key: %{http_code}\n" http://127.0.0.1/proxy/passwd
+curl --fail -s -o /dev/null -w "PURGE existing key: %{http_code}\n" -X PURGE http://127.0.0.1/purge/proxy/passwd
+curl -s -o /dev/null -w "PURGE non-existing key: %{http_code}\n" -X PURGE http://127.0.0.1/purge/proxy/passwd
